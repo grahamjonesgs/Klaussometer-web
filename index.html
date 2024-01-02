@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Rumford 37 Stats</title>
+    <style type="text/css">
+
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-colorschemes"></script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+</head>
+
+<body>
+
+    <form>
+
+        <div class="chart-container" style="position: relative; height:80vh; width:80vw">
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <div style="float:left;margin-right:20px;">
+            <label for="Data">Data</label>
+            <select id="typeSelect">
+                <option value="tempset-ambient">Tempurature</option>
+                <option value="tempset-humidity">Humidity</option>
+                <option value="battery">Battery Voltage</option>
+            </select>
+        </div>
+
+        <div style="float:left;">
+            <label for="Days">Days</label>
+            <select id="daysSelect">
+                <option value="1">1</option>
+                <option value="7">7</option>
+                <option value="31">31</option>
+                <option value="999">999</option>
+            </select>
+        </div>
+
+        <div style="float:left;margin-left:20px;">
+            <button id="selectClick">Select Graph</button>
+        </div>
+
+        <script>
+            var type_value;
+            var type_text;
+            var days_value;
+            var days_text;
+            var xunits;
+            var ctx = 'myChart';
+            var allDatasets;
+            var chart;
+
+            $(document).ready(function() {
+                var typeSel = document.getElementById('typeSelect')
+                var daysSel = document.getElementById('daysSelect');
+                type_value = typeSel.options[typeSel.selectedIndex].value;
+                type_text = typeSel.options[typeSel.selectedIndex].text;
+                days_value = daysSel.options[daysSel.selectedIndex].value;
+                console.log("In doc ready")
+                showGraph();
+            });
+
+            function smooth(inputArray) {
+                var returnArray = [];
+                if (inputArray.length < 5) {
+                    return inputArray;
+                }
+                returnArray.push({
+                    x: inputArray[0]['x'],
+                    y: inputArray[0]['y']
+                })
+                returnArray.push({
+                    x: inputArray[1]['x'],
+                    y: inputArray[1]['y']
+                })
+                for (var i = 2; i < inputArray.length - 2; i++) {
+                    returnArray.push({
+                        x: inputArray[i]['x'],
+                        y: ((parseFloat(inputArray[i - 2]['y']) + parseFloat(inputArray[i - 1]['y']) + parseFloat(inputArray[i]['y']) + parseFloat(inputArray[i + 1]['y']) + parseFloat(inputArray[i + 2]['y'])) / 5.0).toFixed(3)
+                    })
+                }
+                returnArray.push({
+                    x: inputArray[inputArray.length - 2]['x'],
+                    y: inputArray[inputArray.length - 2]['y']
+                })
+                returnArray.push({
+                    x: inputArray[inputArray.length - 1]['x'],
+                    y: inputArray[inputArray.length - 1]['y']
+                })
+                return returnArray;
+            }
+
+            function showGraph() {
+                {
+                    if (days_value < 3)(
+                        xunits = {
+                            unit: 'hour'
+                        }
+                    )
+                    else
+                        (
+                            xunits = {
+                                unit: 'day'
+                            }
+                        )
+
+                    $.post("graph.php?dataType=\"" + type_value + "\"" + "&days=\"" + days_value + "\"",
+                        function(data) {
+                            var datasetLivingroom = [];
+                            var datasetBedroom = [];
+                            var datasetGuest = [];
+                            var datasetCave = [];
+                            var dataJSON = JSON.parse(data);
+                            var livingroomCurrent;
+                            var bedroomCurrent;
+                            var guestCurrent;
+                            var caveCurrent;
+
+
+                            for (var i in dataJSON) {
+                                if (dataJSON[i].room_id == 'livingroom') {
+                                    datasetLivingroom.push({
+                                        x: moment(dataJSON[i].dt).add(1, 'hour'),
+                                        y: dataJSON[i].value
+                                    });
+                                    livingroomCurrent = dataJSON[i].value;
+                                }
+                                if (dataJSON[i].room_id == 'bedroom') {
+                                    datasetBedroom.push({
+                                        x: moment(dataJSON[i].dt).add(1, 'hour'),
+                                        y: dataJSON[i].value
+                                    });
+                                    bedroomCurrent = dataJSON[i].value;
+                                }
+                                if (dataJSON[i].room_id == 'guest') {
+                                    datasetGuest.push({
+                                        x: moment(dataJSON[i].dt).add(1, 'hour'),
+                                        y: dataJSON[i].value
+                                    });
+                                    guestCurrent = dataJSON[i].value;
+                                }
+                                if (dataJSON[i].room_id == 'cave') {
+                                    datasetCave.push({
+                                        x: moment(dataJSON[i].dt).add(1, 'hour'),
+                                        y: dataJSON[i].value
+                                    });
+                                    caveCurrent = dataJSON[i].value;
+                                }
+                            }
+
+
+                            var sLivingroom = {
+                                label: 'Living room - ' + livingroomCurrent,
+                                fill: false,
+                                data: smooth(datasetLivingroom)
+                            };
+                            var sBedroom = {
+                                label: 'Bedroom - ' + bedroomCurrent,
+                                fill: false,
+                                data: smooth(datasetBedroom)
+                            };
+                            var sGuest = {
+                                label: 'Guest - ' + guestCurrent,
+                                fill: false,
+                                data: smooth(datasetGuest)
+                            };
+                            var sCave = {
+                                label: 'Cave - ' + caveCurrent,
+                                fill: false,
+                                data: smooth(datasetCave)
+                            }
+                            if (type_value == 'battery') {
+                                allDatasets = {
+                                    datasets: [sLivingroom, sCave]
+                                }
+                            } else {
+                                allDatasets = {
+                                    datasets: [sLivingroom, sBedroom, sGuest, sCave]
+                                }
+                            }
+                            chart = new Chart(ctx, {
+                                type: 'line',
+                                //data: {
+                                //datasets: [sLivingroom, sBedroom, sGuest, sCave]
+
+                                //},
+                                data: allDatasets,
+                                options: {
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        yAxes: [{
+                                            display: true,
+                                            scaleLabel: {
+                                                display: true,
+                                                labelString: type_text
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            type: 'time',
+                                            time: xunits
+                                        }]
+                                    },
+                                    plugins: {
+
+                                        colorschemes: {
+
+                                            scheme: 'brewer.SetOne4'
+                                        }
+                                    },
+                                    elements: {
+                                        line: {
+                                            tension: 1,
+                                            cubicInterpolationMode: 'monotone'
+                                        },
+                                        point: {
+                                            radius: 0
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    )
+                }
+            }
+
+            document.getElementById('selectClick').addEventListener('click', function() {
+                event.preventDefault();
+
+                var typeSel = document.getElementById('typeSelect');
+                type_value = typeSel.options[typeSel.selectedIndex].value;
+                type_text = typeSel.options[typeSel.selectedIndex].text;
+
+                var daysSel = document.getElementById('daysSelect');
+                days_value = daysSel.options[daysSel.selectedIndex].value;
+                if (chart) {
+                    chart.destroy();
+                }
+                showGraph();
+            });
+
+        </script>
+</body>
+
+</html>

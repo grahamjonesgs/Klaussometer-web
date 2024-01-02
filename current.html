@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Rumford 37</title>
+    <style type="text/css">
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            font-size: 50px;
+            background-color: #f1f1c1;
+        }
+
+
+
+        th,
+        td {
+            text-align: center;
+            padding: 15px;
+        }
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-colorschemes"></script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+
+</head>
+
+<body>
+
+    <form>
+
+        <table style="width:100%">
+            <tr>
+                <th>Room</th>
+                <th>Temp</th>
+                <th>Humidity</th>
+            </tr>
+            <tr>
+                <td>Living Room</td>
+                <td id="LivingroomTemp">--</td>
+                <td id="LivingroomHumidity">--</td>
+            </tr>
+            <tr>
+                <td>Bedroom</td>
+                <td id="BedroomTemp">--</td>
+                <td id="BedroomHumidity">--</td>
+            </tr>
+            <tr>
+                <td>Bathroom</td>
+                <td id="BathroomTemp">--</td>
+                <td id="BathroomHumidity">--</td>
+            </tr>
+            <tr>
+                <td>Kitchen</td>
+                <td id="KitchenTemp">--</td>
+                <td id="KitchenHumidity">--</td>
+            </tr>
+
+
+        </table>
+
+        <p id="endtext" style="font-size:50px;"></p>
+
+
+        <script>
+            $(document).ready(function() {
+
+                console.log("In doc ready");
+                showCurrent();
+            });
+
+
+            function showCurrent() {
+
+                console.log("IN show current");
+
+
+
+                $.post("latest.php?dataType=\"tempset-ambient\"",
+                    function(data) {
+                        var dataJSON = JSON.parse(data);
+                        var livingroomCurrent = -999;
+                        var bedroomCurrent = -999;
+                        var kitchenCurrent = -999;
+                        var bathroomCurrent = -999;
+
+                        console.log(dataJSON);
+                        for (var i in dataJSON) {
+                            console.log(i + dataJSON[i].room_id);
+                            if (dataJSON[i].room_id == 'livingroom') {
+                                livingroomCurrent = dataJSON[i].value;
+                            }
+                            if (dataJSON[i].room_id == 'bedroom') {
+                                bedroomCurrent = dataJSON[i].value;
+                            }
+                            if (dataJSON[i].room_id == 'kitchen') {
+                                kitchenCurrent = dataJSON[i].value;
+                            }
+                            if (dataJSON[i].room_id == 'bathroom') {
+                                bathroomCurrent = dataJSON[i].value;
+                            }
+
+
+                            document.getElementById("BedroomTemp").innerHTML = bedroomCurrent + "&#8451";
+                            document.getElementById("BathroomTemp").innerHTML = bathroomCurrent + "&#8451";
+                            document.getElementById("LivingroomTemp").innerHTML = livingroomCurrent + "&#8451";
+                            document.getElementById("KitchenTemp").innerHTML = kitchenCurrent + "&#8451";
+
+                        }
+                    }
+                )
+
+                $.post("latest.php?dataType=\"tempset-humidity\"",
+                    function(data) {
+                        var dataJSON = JSON.parse(data);
+                        var livingroomCurrent = -999;
+                        var bedroomCurrent = -999;
+                        var kitchenCurrent = -999;
+                        var bathroomCurrent = -999;
+
+                        console.log(dataJSON);
+                        for (var i in dataJSON) {
+                            console.log(i + dataJSON[i].room_id);
+                            if (dataJSON[i].room_id == 'livingroom') {
+                                livingroomCurrent = dataJSON[i].value;
+                            }
+                            if (dataJSON[i].room_id == 'bedroom') {
+                                bedroomCurrent = dataJSON[i].value;
+                            }
+                            if (dataJSON[i].room_id == 'kitchen') {
+                                kitchenCurrent = dataJSON[i].value;
+                            }
+                            if (dataJSON[i].room_id == 'bathroom') {
+                                bathroomCurrent = dataJSON[i].value;
+                            }
+
+                            document.getElementById("BedroomHumidity").innerHTML = bedroomCurrent + "%";
+                            document.getElementById("BathroomHumidity").innerHTML = bathroomCurrent + "%";
+                            document.getElementById("LivingroomHumidity").innerHTML = livingroomCurrent + "%";
+                            document.getElementById("KitchenHumidity").innerHTML = kitchenCurrent + "%";
+
+                            document.getElementById("endtext").innerHTML = "Brought to you by your favorite nerd...";
+
+                        }
+                    }
+                )
+
+
+
+            }
+
+        </script>
+</body>
+
+</html>
