@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Rumford 37 Stats</title>
+    <title>Watsonia 22 Stats</title>
     <style type="text/css">
 
 
@@ -120,11 +120,13 @@
                             var datasetBedroom = [];
                             var datasetGuest = [];
                             var datasetCave = [];
+                            var datasetOutside = [];
                             var dataJSON = JSON.parse(data);
                             var livingroomCurrent;
                             var bedroomCurrent;
                             var guestCurrent;
                             var caveCurrent;
+                            var outsideCurrent;
 
 
                             for (var i in dataJSON) {
@@ -156,6 +158,13 @@
                                     });
                                     caveCurrent = dataJSON[i].value;
                                 }
+                                if (dataJSON[i].room_id == 'outside') {
+                                    datasetOutside.push({
+                                        x: moment(dataJSON[i].dt).add(1, 'hour'),
+                                        y: dataJSON[i].value
+                                    });
+                                    outsideCurrent = dataJSON[i].value;
+                                }
                             }
 
 
@@ -179,13 +188,18 @@
                                 fill: false,
                                 data: smooth(datasetCave)
                             }
+                            var sOutside = {
+                                label: 'Outside - ' + outsideCurrent,
+                                fill: false,
+                                data: smooth(datasetOutside)
+                            }
                             if (type_value == 'battery') {
                                 allDatasets = {
                                     datasets: [sLivingroom, sCave]
                                 }
                             } else {
                                 allDatasets = {
-                                    datasets: [sLivingroom, sBedroom, sGuest, sCave]
+                                    datasets: [sLivingroom, sBedroom, sGuest, sCave, sOutside]
                                 }
                             }
                             chart = new Chart(ctx, {
@@ -214,7 +228,7 @@
 
                                         colorschemes: {
 
-                                            scheme: 'brewer.SetOne4'
+                                            scheme: 'brewer.SetOne5'
                                         }
                                     },
                                     elements: {
