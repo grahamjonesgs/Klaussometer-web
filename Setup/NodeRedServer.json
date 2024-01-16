@@ -7,6 +7,46 @@
         "info": ""
     },
     {
+        "id": "3a5fe7285b36525c",
+        "type": "MySQLdatabase",
+        "name": "LocalDB",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "readings",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "d65544ef.5cd538",
+        "type": "mqtt-broker",
+        "name": "local mqtt",
+        "broker": "localhost",
+        "port": "1883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "compatmode": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
         "id": "c9ae7137.94207",
         "type": "function",
         "z": "f887e884.30f758",
@@ -14,8 +54,8 @@
         "func": "var room=msg.topic.substr(0,msg.topic.indexOf(\"/\"))\n\nvar msgtype=msg.topic.slice(msg.topic.indexOf(\"/\")+1,msg.topic.lastIndexOf(\"/\"))\nmsg.payload = {\"type\":msgtype,\"room\":room  ,   \"value\": msg.payload};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 460,
-        "y": 300,
+        "x": 480,
+        "y": 280,
         "wires": [
             [
                 "f41d93b7.dcd82"
@@ -83,7 +123,7 @@
         "mydb": "3a5fe7285b36525c",
         "name": "Readings Database",
         "x": 750,
-        "y": 300,
+        "y": 280,
         "wires": [
             []
         ]
@@ -140,7 +180,7 @@
         "nl": false,
         "rap": false,
         "inputs": 0,
-        "x": 130,
+        "x": 110,
         "y": 240,
         "wires": [
             [
@@ -179,7 +219,7 @@
         "broker": "d65544ef.5cd538",
         "inputs": 0,
         "x": 130,
-        "y": 280,
+        "y": 300,
         "wires": [
             [
                 "c9ae7137.94207"
@@ -197,7 +237,7 @@
         "broker": "d65544ef.5cd538",
         "inputs": 0,
         "x": 130,
-        "y": 320,
+        "y": 340,
         "wires": [
             [
                 "c9ae7137.94207"
@@ -217,7 +257,7 @@
         "rap": false,
         "inputs": 0,
         "x": 110,
-        "y": 360,
+        "y": 380,
         "wires": [
             [
                 "c9ae7137.94207"
@@ -236,44 +276,8 @@
         "nl": false,
         "rap": false,
         "inputs": 0,
-        "x": 140,
-        "y": 400,
-        "wires": [
-            [
-                "c9ae7137.94207"
-            ]
-        ]
-    },
-    {
-        "id": "1f7eb8dd.fa9347",
-        "type": "mqtt in",
-        "z": "f887e884.30f758",
-        "name": "",
-        "topic": "bathroom/battery/set",
-        "qos": "2",
-        "datatype": "auto",
-        "broker": "d65544ef.5cd538",
-        "inputs": 0,
-        "x": 160,
-        "y": 440,
-        "wires": [
-            [
-                "c9ae7137.94207"
-            ]
-        ]
-    },
-    {
-        "id": "a67c8d70.b86fd",
-        "type": "mqtt in",
-        "z": "f887e884.30f758",
-        "name": "",
-        "topic": "livingroom/battery/set",
-        "qos": "2",
-        "datatype": "auto",
-        "broker": "d65544ef.5cd538",
-        "inputs": 0,
-        "x": 160,
-        "y": 480,
+        "x": 120,
+        "y": 420,
         "wires": [
             [
                 "c9ae7137.94207"
@@ -322,8 +326,8 @@
         "nl": false,
         "rap": false,
         "inputs": 0,
-        "x": 160,
-        "y": 540,
+        "x": 120,
+        "y": 460,
         "wires": [
             [
                 "c9ae7137.94207"
@@ -331,43 +335,23 @@
         ]
     },
     {
-        "id": "3a5fe7285b36525c",
-        "type": "MySQLdatabase",
-        "name": "LocalDB",
-        "host": "127.0.0.1",
-        "port": "3306",
-        "db": "readings",
-        "tz": "",
-        "charset": "UTF8"
-    },
-    {
-        "id": "d65544ef.5cd538",
-        "type": "mqtt-broker",
-        "name": "local mqtt",
-        "broker": "localhost",
-        "port": "1883",
-        "tls": "",
-        "clientid": "",
-        "autoConnect": true,
-        "usetls": false,
-        "compatmode": false,
-        "protocolVersion": "4",
-        "keepalive": "60",
-        "cleansession": true,
-        "autoUnsubscribe": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
+        "id": "fba5881d28ad3d49",
+        "type": "mqtt in",
+        "z": "f887e884.30f758",
+        "name": "",
+        "topic": "outside/battery/set",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "d65544ef.5cd538",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 90,
+        "y": 540,
+        "wires": [
+            [
+                "c9ae7137.94207"
+            ]
+        ]
     }
 ]
