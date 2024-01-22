@@ -1,7 +1,74 @@
+*** Set up Swap
+sudo fallocate -l 1G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+*** Install software
+sudo apt install mariadb-server apache2 php libapache2-mod-php php-mysql npm mosquitto-clients mosquitto
+
+*** Update node.js
+npm install n -g
+n latest
 
 
+*** Secure Mariadb
+sudo mysql_secure_installation
 
-Apache
+*** Setup Certs
+sudo snap install --classic certbot
+sudo certbot --apache -d your_domain -d www.your_domain
+sudo chmod -R 775 /etc/letsencrypt/live
+sudo chmod -R 775 /etc/letsencrypt/archive/
+
+*** Install node-red
+bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+
+In setting.js (user .node-red directory)
+credentialSecret: "xxxxxxxxx"
+uncomment require("fs");
+
+adminAuth: {
+        type: "credentials",
+        users: [{
+            username: "admin",
+            password: "xxxxxxx", // Should come from auto setup on installation
+            permissions: "*"
+       }]
+    },
+
+https: {
+        key: fs.readFileSync('/etc/letsencrypt/live/mydomain.com/privkey.pem
+        cert: fs.readFileSync('/etc/letsencrypt/live/mydomain.com/cert.pem
+    },
+    requireHttps: true,
+
+Create /etc/mosquitto/conf.d/default.conf
+allow_anonymous false
+password_file /etc/mosquitto/passwd
+
+listener 1883 
+#listener 8883
+#certfile cert.pem
+#cafile chain.pem
+#keyfile privkey.pem
+
+
+sudo systemctl enable nodered.service
+sudo systemctl start nodered.service
+- open 1880
+Go to your_domain:1880
+ - from node website install pallet "node-red-node-mysql"
+ - copy in JSON and add user name and passwords for matt and database
+
+
+*** Mosquitto
+sudo mosquitto_passwd -c /etc/mosquitto/passwd reporter
+ - open 1883
+
+
+*** Apache
 /var/www/mydomain.com/index.html
 <html>
     <head>
@@ -44,50 +111,28 @@ SSLCertificateKeyFile /etc/letsencrypt/live/mydomain.com/privkey.pem
 </IfModule>
 
 
-Letsencrypt
-Install python-certbot-apache
-sudo certbot --apache -d your_domain -d www.your_domain
 
-/etc/letsencrypt/live & /etc/letsencrypt/archive both need to have permissions set at 755
-
-Node Red – install Node Red and add the palet for mysql
-sudo npm install -g node-red-admin
-
-In setting.js
-credentialSecret: "xxxxxxxxx"
-uncomment require("fs");
-
-adminAuth: {
-        type: "credentials",
-        users: [{
-            username: "admin",
-            password: "xxxxxxx",
-            permissions: "*"
-       }]
-    },
-
-https: {
-        key: fs.readFileSync('/etc/letsencrypt/live/mydomain.com/p$
-        cert: fs.readFileSync('/etc/letsencrypt/live/mydomain.com/$
-    },
-    requireHttps: true,
-
-NOTE node-red-admin hash-pw sets the password
+sudo a2ensite www.mydomain.com-le-ssl
+sudo a2ensite www.mydomain.com
+sudo a2dissite 000-default-le-ssl.conf
+sudo a2dissite000-default.conf
+sudo systemctl reload apache2
 
 
-MYSQL,
-Install. Create users with
-CREATE USER 'grahamjonesgs'@'%' IDENTIFIED BY 'passwordxxxx'
+
+*** Config database
+Create local user with write privileges
+CREATE USER 'grahamjonesgs'@'localhost' IDENTIFIED BY 'passwordxxxx';
 GRANT ALL PRIVILEGES ON * . * TO 'grahamjonesgs'@'localhost';
-Create database readings
 
+Create database readings;
 Read only user for php
-mysql> CREATE USER 'reader'@'%' IDENTIFIED BY 'xxxxxxxxxx'
-
+mysql> CREATE USER 'reader'@'%' IDENTIFIED BY 'xxxxxxxxxx';
 mysql> GRANT SELECT ON readings.* TO 'reader'@'%';
+flush privileges;
 
 
-
+Use readings;
 create table rec_data (
 room_id VARCHAR(50) NOT NULL,
 value FLOAT NOT NULL,
@@ -95,7 +140,10 @@ type VARCHAR(50) NOT NULL,
 dt   DATETIME DEFAULT CURRENT_TIMESTAMP);
 
 
-PHP
-sudo apt install php php-mysql libapache2-mod-php
+* To export a database 
+mysqldump -u grahamjonesgs -p readings > readings_backup.sql
+* To import a database
+mysql -u grahamjonesgs -p readings < readings_backup.sql
+
 
 
